@@ -38,7 +38,7 @@ resource "aws_subnet" "private_subnets" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = [for subnet in var.subnets : subnet.cidr_block if subnet.type == "private"][0][count.index]
   availability_zone       = var.azs[count.index]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
     Name        = "${var.common_tags["env"]}-${var.common_tags["proj"]}-Private-Subnet-${substr(var.azs[count.index], -1, 1)}"
@@ -52,7 +52,7 @@ resource "aws_subnet" "data_subnets" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = [for subnet in var.subnets : subnet.cidr_block if subnet.type == "data"][0][count.index]
   availability_zone       = var.azs[count.index]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
     Name        = "${var.common_tags["env"]}-${var.common_tags["proj"]}-data-Subnet-${substr(var.azs[count.index], -1, 1)}"
