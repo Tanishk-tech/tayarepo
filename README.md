@@ -16,3 +16,9 @@ packer --version
 // packer init .
 // packer build ui_ami.pkr.hcl
 //sudo yum install packer -y  
+
+# command for tar 
+cd /opt/packer/tayarepo
+tar czf nginx.tar.gz -C nginx .
+tar czf javacode.tar.gz -C javacode .
+

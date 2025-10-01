@@ -19,7 +19,7 @@ source "amazon-ebs" "ui" {
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }
-    owners      = ["137112412989"]
+    owners      = ["137112412989"]  # Amazon Linux 2 official
     most_recent = true
   }
 }
@@ -29,26 +29,15 @@ build {
   sources = ["source.amazon-ebs.ui"]
 
   ############################
-  # Compress local folders during build
-  ############################
-  provisioner "shell" {
-    inline = [
-      "mkdir -p /tmp/upload",
-      "tar czf /tmp/upload/nginx.tar.gz -C /opt/packer/tayarepo/nginx . || true",
-      "tar czf /tmp/upload/javacode.tar.gz -C /opt/packer/tayarepo/javacode . || true"
-    ]
-  }
-
-  ############################
-  # Upload tarballs to temp location
+  # Upload tarballs from local machine
   ############################
   provisioner "file" {
-    source      = "/tmp/upload/nginx.tar.gz"
+    source      = "/opt/packer/tayarepo/nginx.tar.gz"
     destination = "/tmp/nginx.tar.gz"
   }
 
   provisioner "file" {
-    source      = "/tmp/upload/javacode.tar.gz"
+    source      = "/opt/packer/tayarepo/javacode.tar.gz"
     destination = "/tmp/javacode.tar.gz"
   }
 
