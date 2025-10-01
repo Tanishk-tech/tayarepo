@@ -70,7 +70,7 @@ module "s3-config" {
   s3_enable_website = false
   s3_routing_rules  = var.s3_routing_rules
   common_tags       = var.common_tags
-  folders           = ["configs/env_conf/api/environment.conf", "configs/env_conf/job/environment.conf"]
+  folders           = ["configs", "configs"]
 }
 
 module "s3-logs" {
