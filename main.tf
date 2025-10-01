@@ -59,20 +59,20 @@ module "s3-code-deploy" {
   common_tags       = var.common_tags
 }
 
-module "Route53" {
-  source           = "github.com/Tanishk-tech/tayarepo//Route53?ref=childModules"
-  zone_domain_name = local.baseDomainName
-  only_recods      = true
-  manual_zone_id   = ""
-  records = {
-    dev_lb = {
-      sub_domain = "dev"
-      type       = "CNAME"
-      ttl        = 30
-      records    = [module.albv2.lb_dns_name]
-    },
-  }
-}
+# module "Route53" {
+#   source           = "github.com/Tanishk-tech/tayarepo//Route53?ref=childModules"
+#   zone_domain_name = local.baseDomainName
+#   only_recods      = true
+#   manual_zone_id   = ""
+#   records = {
+#     dev_lb = {
+#       sub_domain = "dev"
+#       type       = "CNAME"
+#       ttl        = 30
+#       records    = [module.albv2.lb_dns_name]
+#     },
+#   }
+# }
 
 module "ec2-keypair" {
   source      = "github.com/Tanishk-tech/tayarepo//ec2-pair?ref=childModules"
@@ -132,10 +132,10 @@ module "asg_ui" {
   instance_type    = var.ec2_ui_inst_type
   key_name         = module.ec2-keypair.ec2_key_name
   user_data        = ""
-  kms_id           = module.ae_kms.kms_arn
+  # kms_id           = module.ae_kms.kms_arn
   common_tags      = var.common_tags
   buckets_readonly = [module.s3-code-deploy.s3_id, module.s3-config.s3_id]
-  buckets_write    = [module.s3-logs.s3_id]
+  # buckets_write    = [module.s3-logs.s3_id]
   alerts_enabled   = true
 
   cpu_evaluation_periods = 1
@@ -243,9 +243,9 @@ module "asg_ui" {
 
 # }
 
-module "secret_manager" {
-  source      = "github.com/Tanishk-tech/tayarepo//secretManager?ref=childModules"
-  sm_name     = var.secretManagerName
-  common_tags = var.common_tags
-  kms_id      = module.ae_kms.kms_arn
-}
+# module "secret_manager" {
+#   source      = "github.com/Tanishk-tech/tayarepo//secretManager?ref=childModules"
+#   sm_name     = var.secretManagerName
+#   common_tags = var.common_tags
+#   kms_id      = module.ae_kms.kms_arn
+# }
