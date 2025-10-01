@@ -60,19 +60,6 @@ module "s3-code-deploy" {
 }
 
 
-
-module "s3-code-deploy" {
-  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
-  s3_name           = "code-deploy"
-  s3_acl            = var.s3_acl
-  s3_versioning     = "Disabled"
-  s3_index_document = var.s3_index_document
-  s3_error_document = var.s3_error_document
-  s3_enable_website = false
-  s3_routing_rules  = var.s3_routing_rules
-  common_tags       = var.common_tags
-}
-
 module "s3-config" {
   source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
   s3_name           = "apps-config"
