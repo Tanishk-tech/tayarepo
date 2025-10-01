@@ -59,6 +59,69 @@ module "s3-code-deploy" {
   common_tags       = var.common_tags
 }
 
+
+
+module "s3-code-deploy" {
+  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
+  s3_name           = "code-deploy"
+  s3_acl            = var.s3_acl
+  s3_versioning     = "Disabled"
+  s3_index_document = var.s3_index_document
+  s3_error_document = var.s3_error_document
+  s3_enable_website = false
+  s3_routing_rules  = var.s3_routing_rules
+  common_tags       = var.common_tags
+}
+
+module "s3-config" {
+  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
+  s3_name           = "apps-config"
+  s3_acl            = var.s3_acl
+  s3_versioning     = "Disabled"
+  s3_index_document = var.s3_index_document
+  s3_error_document = var.s3_error_document
+  s3_enable_website = false
+  s3_routing_rules  = var.s3_routing_rules
+  common_tags       = var.common_tags
+  folders           = ["configs/env_conf/api/environment.conf", "configs/env_conf/job/environment.conf"]
+}
+
+module "s3-logs" {
+  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
+  s3_name           = "apps-logs"
+  s3_acl            = var.s3_acl
+  s3_versioning     = "Disabled"
+  s3_index_document = var.s3_index_document
+  s3_error_document = var.s3_error_document
+  s3_enable_website = false
+  s3_routing_rules  = var.s3_routing_rules
+  common_tags       = var.common_tags
+}
+
+module "mtls-truststore" {
+  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
+  s3_name           = "mtls-truststore"
+  s3_acl            = var.s3_acl
+  s3_versioning     = var.s3_versioning
+  s3_index_document = var.s3_index_document
+  s3_error_document = var.s3_error_document
+  s3_enable_website = false
+  s3_routing_rules  = var.s3_routing_rules
+  common_tags       = var.common_tags
+}
+
+module "s3_heapdump" {
+  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modulesV2/s3?ref=tf-v2.0.0.1"
+  s3_name           = "heapdump"
+  s3_acl            = var.s3_acl
+  s3_versioning     = "Suspended"
+  s3_index_document = var.s3_index_document
+  s3_error_document = var.s3_error_document
+  s3_enable_website = false
+  s3_routing_rules  = var.s3_routing_rules
+  common_tags       = var.common_tags
+}
+
 # module "Route53" {
 #   source           = "github.com/Tanishk-tech/tayarepo//Route53?ref=childModules"
 #   zone_domain_name = local.baseDomainName
