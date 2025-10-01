@@ -1,5 +1,6 @@
 // packer init .
 // packer build ui_ami.pkr.hcl
+//sudo yum install packer -y   
 
 packer {
   required_plugins {
