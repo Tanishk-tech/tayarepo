@@ -62,11 +62,11 @@ build {
 
       # Extract uploaded files
       "sudo mkdir -p /opt/javacode /opt/nginx",
-      "sudo tar xzf /tmp/nginx.tar.gz -C /opt/nginx/",
+      "sudo tar xzf /tmp/nginx.tar.gz -C /etc/nginx/",
       "sudo tar xzf /tmp/javacode.tar.gz -C /opt/javacode/",
 
       # Create sample landing page
-      "echo '<h1>UI AMI Ready 🚀 (Amazon Linux 2023)</h1>' | sudo tee /usr/share/nginx/html/index.html",
+      "echo '<h1>UI AMI Ready (Amazon Linux 2023)</h1>' | sudo tee /usr/share/nginx/html/index.html",
 
       # Setup Java app to run at reboot
       "(crontab -l 2>/dev/null; echo '@reboot nohup java -cp /opt/javacode MainClass &') | crontab -"
