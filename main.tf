@@ -61,7 +61,7 @@ module "s3-code-deploy" {
 
 
 module "s3-config" {
-  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
+  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
   s3_name           = "apps-config"
   s3_acl            = var.s3_acl
   s3_versioning     = "Disabled"
@@ -74,7 +74,7 @@ module "s3-config" {
 }
 
 module "s3-logs" {
-  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
+  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
   s3_name           = "apps-logs"
   s3_acl            = var.s3_acl
   s3_versioning     = "Disabled"
@@ -86,7 +86,7 @@ module "s3-logs" {
 }
 
 module "mtls-truststore" {
-  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modules/s3?ref=v1.0.0"
+  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
   s3_name           = "mtls-truststore"
   s3_acl            = var.s3_acl
   s3_versioning     = var.s3_versioning
@@ -98,7 +98,7 @@ module "mtls-truststore" {
 }
 
 module "s3_heapdump" {
-  source            = "github.com/AlertEnterprise-Inc/aehsc-config//modulesV2/s3?ref=tf-v2.0.0.1"
+  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
   s3_name           = "heapdump"
   s3_acl            = var.s3_acl
   s3_versioning     = "Suspended"
