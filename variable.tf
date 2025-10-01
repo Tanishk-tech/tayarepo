@@ -135,7 +135,7 @@ variable "ec2_pub_keys" {
 }
 
 variable "ec2_ui_ami" {
-  default = "ami-08c43a89b126dcf2a"
+  default = "ami-04411f7f85bb42e31"
 }
 
 variable "ec2_api_ami" {

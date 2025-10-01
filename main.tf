@@ -22,12 +22,12 @@ locals {
 }
 
 module "aeKms" {
-  source      = "github.com/Tanishk-tech/tayarepo//childModules/kms?ref=childModules"
+  source      = "github.com/Tanishk-tech/tayarepo//kms?ref=childModules"
   common_tags = var.common_tags
 }
 
 module "vpc" {
-  source               = "github.com/Tanishk-tech/tayarepo//childModules/VPC?ref=childModules"
+  source               = "github.com/Tanishk-tech/tayarepo//VPC?ref=childModules"
   vpc_name             = var.vpc_name
   vpc_cidr             = var.vpc_cidr
   enable_dns_hostnames = var.enable_dns_hostnames
@@ -35,7 +35,7 @@ module "vpc" {
 }
 
 module "subnets" {
-  source                      = "github.com/Tanishk-tech/tayarepo//childModules/Subnet?ref=childModules"
+  source                      = "github.com/Tanishk-tech/tayarepo//Subnet?ref=childModules"
   vpc_id                      = module.vpc.vpc_id
   igw_id                      = module.vpc.internet_gateway_id
   dynamic_subnet_types        = var.dynamic_subnet_types
@@ -48,7 +48,7 @@ module "subnets" {
 }
 
 module "s3-code-deploy" {
-  source            = "github.com/Tanishk-tech/tayarepo//childModules/S3?ref=childModules"
+  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
   s3_name           = "code-deploy"
   s3_acl            = var.s3_acl
   s3_versioning     = "Disabled"
@@ -60,7 +60,7 @@ module "s3-code-deploy" {
 }
 
 module "Route53" {
-  source           = "github.com/Tanishk-tech/tayarepo//childModules/Route53?ref=childModules"
+  source           = "github.com/Tanishk-tech/tayarepo//Route53?ref=childModules"
   zone_domain_name = local.baseDomainName
   only_recods      = true
   manual_zone_id   = ""
@@ -75,14 +75,14 @@ module "Route53" {
 }
 
 module "ec2-keypair" {
-  source      = "github.com/Tanishk-tech/tayarepo//childModules/ec2-pair?ref=childModules"
+  source      = "github.com/Tanishk-tech/tayarepo//ec2-pair?ref=childModules"
   common_tags = var.common_tags
   public_key  = var.ec2_pub_keys
 }
 
 
 module "ui_tg" {
-  source                           = "github.com/Tanishk-tech/tayarepo//childModules/ALB_TG?ref=childModules"
+  source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
   target_group_name                = "ui-tg"
   port                             = 80
   protocol                         = "HTTP"
@@ -101,27 +101,27 @@ module "ui_tg" {
 
 
 
-module "api_tg" {
-  source                           = "github.com/Tanishk-tech/tayarepo//childModules/ALB_TG?ref=childModules"
-  target_group_name                = "api-tg"
-  port                             = 9000
-  protocol                         = "HTTP"
-  vpc_id                           = module.vpc.vpc_id
-  health_check_healthy_threshold   = 3
-  health_check_unhealthy_threshold = 2
-  health_check_timeout             = 5
-  health_check_interval            = 30
-  health_check_path                = "/"
-  health_check_port                = "9000"
-  health_check_protocol            = "HTTP"
-  health_check_matcher             = "401"
-  common_tags                      = var.common_tags
-  stickiness                       = false
-  deregistration_delay             = 60
-}
+# module "api_tg" {
+#   source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
+#   target_group_name                = "api-tg"
+#   port                             = 9000
+#   protocol                         = "HTTP"
+#   vpc_id                           = module.vpc.vpc_id
+#   health_check_healthy_threshold   = 3
+#   health_check_unhealthy_threshold = 2
+#   health_check_timeout             = 5
+#   health_check_interval            = 30
+#   health_check_path                = "/"
+#   health_check_port                = "9000"
+#   health_check_protocol            = "HTTP"
+#   health_check_matcher             = "401"
+#   common_tags                      = var.common_tags
+#   stickiness                       = false
+#   deregistration_delay             = 60
+# }
 
 module "asg_ui" {
-  source           = "github.com/Tanishk-tech/tayarepo//childModules/ASG?ref=childModules"
+  source           = "github.com/Tanishk-tech/tayarepo//ASG?ref=childModules"
   asg_name         = "ui-asg"
   desired_capacity = 1
   min_size         = 1
@@ -177,7 +177,7 @@ module "asg_ui" {
       to_port         = 80
       protocol        = "tcp"
       cidr_blocks     = [],
-      security_groups = [module.albv2.sg_id]
+      security_groups = [var.bastion_server_ip]
     },
     {
       description     = "Bastion SSH Access"
@@ -193,58 +193,58 @@ module "asg_ui" {
 }
 
 
-module "albv2" {
-  source             = "github.com/Tanishk-tech/tayarepo//childModules/ALB?ref=childModules"
-  lb_name            = "alb"
-  lb_internal        = false
-  lb_type            = "application"
-  lb_subnets         = module.subnets.public_subnet_ids
-  cert_arn           = local.certificateArn
-  ssl_policy         = "ELBSecurityPolicy-TLS13-1-2-Res-FIPS-2023-04"
-  host_preserve      = true
-  lb_del_protection  = true
-  enable_access_logs = false
-  lb_logs_bucket_id  = "your-s3-bucket-id"
-  lb_logs_prefix     = "alb-logs"
-  lb_logs_enabled    = false
-  common_tags        = var.common_tags
-  vpc_id             = module.vpc.vpc_id
-  enable_mtls        = false
+# module "albv2" {
+#   source             = "github.com/Tanishk-tech/tayarepo//ALB?ref=childModules"
+#   lb_name            = "alb"
+#   lb_internal        = false
+#   lb_type            = "application"
+#   lb_subnets         = module.subnets.public_subnet_ids
+#   cert_arn           = local.certificateArn
+#   ssl_policy         = "ELBSecurityPolicy-TLS13-1-2-Res-FIPS-2023-04"
+#   host_preserve      = true
+#   lb_del_protection  = true
+#   enable_access_logs = false
+#   lb_logs_bucket_id  = "your-s3-bucket-id"
+#   lb_logs_prefix     = "alb-logs"
+#   lb_logs_enabled    = false
+#   common_tags        = var.common_tags
+#   vpc_id             = module.vpc.vpc_id
+#   enable_mtls        = false
 
-  ca_certificates_bundle_s3_bucket         = module.mtls-truststore.s3_id
-  ca_certificates_bundle_s3_key            = "uat.crt"
-  ca_certificates_bundle_s3_object_version = ""
-  listener_rules = [
-    {
-      path_pattern     = "/*"
-      host_header      = "dev.${var.main_domain_name}"
-      priority         = 1
-      target_group_arn = module.ui_tg.target_group_arn
-    }
-  ]
+#   ca_certificates_bundle_s3_bucket         = module.mtls-truststore.s3_id
+#   ca_certificates_bundle_s3_key            = "uat.crt"
+#   ca_certificates_bundle_s3_object_version = ""
+#   listener_rules = [
+#     {
+#       path_pattern     = "/*"
+#       host_header      = "dev.${var.main_domain_name}"
+#       priority         = 1
+#       target_group_arn = module.ui_tg.target_group_arn
+#     }
+#   ]
 
-  ingress_rules = [
-    {
-      description = "Pub HTTP Access"
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-      description = "Pub HTTPS Access"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  ]
-  sg_outbond = ["0.0.0.0/0"]
+#   ingress_rules = [
+#     {
+#       description = "Pub HTTP Access"
+#       from_port   = 80
+#       to_port     = 80
+#       protocol    = "tcp"
+#       cidr_blocks = ["0.0.0.0/0"]
+#     },
+#     {
+#       description = "Pub HTTPS Access"
+#       from_port   = 443
+#       to_port     = 443
+#       protocol    = "tcp"
+#       cidr_blocks = ["0.0.0.0/0"]
+#     }
+#   ]
+#   sg_outbond = ["0.0.0.0/0"]
 
-}
+# }
 
 module "secret_manager" {
-  source      = "github.com/Tanishk-tech/tayarepo//childModules/secretManager?ref=childModules"
+  source      = "github.com/Tanishk-tech/tayarepo//secretManager?ref=childModules"
   sm_name     = var.secretManagerName
   common_tags = var.common_tags
   kms_id      = module.ae_kms.kms_arn
