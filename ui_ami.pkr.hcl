@@ -33,8 +33,6 @@ build {
   name    = "ui-ami-build"
   sources = ["source.amazon-ebs.ui_ami"]
 
-
-  # 📤 Upload tarballs into instance
   provisioner "file" {
     source      = "/opt/packer/tayarepo/nginx.tar.gz"
     destination = "/tmp/nginx.tar.gz"
@@ -45,28 +43,32 @@ build {
     destination = "/tmp/javacode.tar.gz"
   }
 
-  # ⚙️ Provision inside the instance
   provisioner "shell" {
     inline = [
-      # Use dnf instead of yum (Amazon Linux 2023)
+      # Update OS
       "sudo dnf -y update",
 
-      # Install nginx + java directly
-      "sudo dnf install -y nginx java-17-amazon-corretto java-17-amazon-corretto-devel",
+      # Install required packages
+      "sudo dnf install -y nginx java-17-amazon-corretto java-17-amazon-corretto-devel cronie tar",
 
       # Enable + start nginx
+      "sudo systemctl daemon-reload",
       "sudo systemctl enable nginx",
       "sudo systemctl start nginx",
 
-      # Extract your files
+      # Enable and start cron service (needed for @reboot jobs)
+      "sudo systemctl enable crond",
+      "sudo systemctl start crond",
+
+      # Extract uploaded files
       "sudo mkdir -p /opt/javacode /opt/nginx",
       "sudo tar xzf /tmp/nginx.tar.gz -C /opt/nginx/",
       "sudo tar xzf /tmp/javacode.tar.gz -C /opt/javacode/",
 
-      # Test landing page
+      # Create sample landing page
       "echo '<h1>UI AMI Ready 🚀 (Amazon Linux 2023)</h1>' | sudo tee /usr/share/nginx/html/index.html",
 
-      # Cron job for Java app
+      # Setup Java app to run at reboot
       "(crontab -l 2>/dev/null; echo '@reboot nohup java -cp /opt/javacode MainClass &') | crontab -"
     ]
   }
