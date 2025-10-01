@@ -7,30 +7,34 @@ packer {
   }
 }
 
-source "amazon-ebs" "ui" {
-  region        = "us-east-1"
-  instance_type = "t2.micro"
-  ssh_username  = "ec2-user"
-  ami_name      = "ui-ami-{{timestamp}}"
+variable "region" {
+  default = "us-east-1"
+}
+
+source "amazon-ebs" "ui_ami" {
+  region                  = var.region
+  instance_type           = "t2.micro"
+  ami_name                = "ui-ami-{{timestamp}}"
 
   source_ami_filter {
     filters = {
-      name                = "amzn2-ami-hvm-*-x86_64-gp2"
+      name                = "al2023-ami-2023.*-x86_64"
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }
-    owners      = ["137112412989"]  # Amazon Linux 2 official
+    owners      = ["amazon"]
     most_recent = true
   }
+
+  ssh_username = "ec2-user"
 }
 
 build {
-  name    = "ui-ami"
-  sources = ["source.amazon-ebs.ui"]
+  name    = "ui-ami-build"
+  sources = ["source.amazon-ebs.ui_ami"]
 
-  ############################
-  # Upload tarballs from local machine
-  ############################
+
+  # 📤 Upload tarballs into instance
   provisioner "file" {
     source      = "/opt/packer/tayarepo/nginx.tar.gz"
     destination = "/tmp/nginx.tar.gz"
@@ -41,38 +45,29 @@ build {
     destination = "/tmp/javacode.tar.gz"
   }
 
-  ############################
-  # Shell provisioning
-  ############################
+  # ⚙️ Provision inside the instance
   provisioner "shell" {
     inline = [
-      # Kill any existing yum process & remove stale locks
-      "sudo killall -9 yum || true",
-      "sudo rm -f /var/run/yum.pid /var/run/yum.lock || true",
+      # Use dnf instead of yum (Amazon Linux 2023)
+      "sudo dnf -y update",
 
-      # Update system and install packages
-      "sudo yum update -y",
-      "sudo yum install -y nginx",
-      "sudo amazon-linux-extras enable java-openjdk11",
-      "sudo yum install -y java-11-openjdk java-11-openjdk-devel",
+      # Install nginx + java directly
+      "sudo dnf install -y nginx java-17-amazon-corretto java-17-amazon-corretto-devel",
 
-      # Extract nginx tarball
-      "sudo mkdir -p /etc/nginx",
-      "sudo tar xzf /tmp/nginx.tar.gz -C /etc/nginx",
-
-      # Extract Java code
-      "sudo mkdir -p /opt/javacode",
-      "sudo tar xzf /tmp/javacode.tar.gz -C /opt/javacode",
-
-      # Compile Java file
-      "cd /opt/javacode && sudo javac ex.java || true",
-
-      # Setup cron job to run Java at reboot
-      "echo '@reboot nohup java -cp /opt/javacode ex > /opt/javacode/app.log 2>&1 &' | crontab -",
-
-      # Enable nginx service
+      # Enable + start nginx
       "sudo systemctl enable nginx",
-      "sudo systemctl start nginx"
+      "sudo systemctl start nginx",
+
+      # Extract your files
+      "sudo mkdir -p /opt/javacode /opt/nginx",
+      "sudo tar xzf /tmp/nginx.tar.gz -C /opt/nginx/",
+      "sudo tar xzf /tmp/javacode.tar.gz -C /opt/javacode/",
+
+      # Test landing page
+      "echo '<h1>UI AMI Ready 🚀 (Amazon Linux 2023)</h1>' | sudo tee /usr/share/nginx/html/index.html",
+
+      # Cron job for Java app
+      "(crontab -l 2>/dev/null; echo '@reboot nohup java -cp /opt/javacode MainClass &') | crontab -"
     ]
   }
 }
