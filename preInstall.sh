@@ -30,7 +30,6 @@ packer build ui_ami.pkr.hcl
 echo "=== Creating S3 bucket ==="
 aws s3api create-bucket \
     --bucket dev-taya-aehsc-tf-state \
-    --region us-east-1 \
-    --create-bucket-configuration LocationConstraint=us-east-1 || true
+    --region us-east-1
 
 echo "=== Script Completed Successfully ==="
