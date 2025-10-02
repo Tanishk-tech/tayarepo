@@ -22,3 +22,8 @@ cd /opt/packer/tayarepo
 tar czf nginx.tar.gz -C nginx .
 tar czf javacode.tar.gz -C javacode .
 
+
+#pat token
+
+export PAT_TOKEN=""
+
