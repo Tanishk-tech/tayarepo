@@ -117,6 +117,8 @@ module "ec2_instance" {
   key_name      = var.key_name
   instance_name = var.ui_instance_name
   common_tags   = var.common_tags
+
+  depends_on = [ module.ec2-keypair ]
 }
 
 
