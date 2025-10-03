@@ -109,6 +109,17 @@ module "s3_heapdump" {
   common_tags       = var.common_tags
 }
 
+module "ec2_instance" {
+  source        = "github.com/Tanishk-tech/tayarepo//EC2?ref=childModules"
+  ami           = var.ec2_ui_ami
+  instance_type = var.ec2_ui_inst_type
+  subnet_id     = module.subnets.public_subnet_ids[0]
+  key_name      = var.key_name
+  instance_name = var.ui_instance_name
+  common_tags   = var.common_tags
+}
+
+
 # module "Route53" {
 #   source           = "github.com/Tanishk-tech/tayarepo//Route53?ref=childModules"
 #   zone_domain_name = local.baseDomainName

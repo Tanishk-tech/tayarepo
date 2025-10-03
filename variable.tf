@@ -177,6 +177,23 @@ variable "job_name" {
   default = "job"
 }
 
+variable "ui_name" {
+  default = "job"
+}
+
+variable "ui_instance_name" {
+  description = "Name of EC2 instance"
+  type        = string
+  default = "ui-server"
+}
+
+
+variable "key_name" {
+  description = "EC2 key pair name"
+  type        = string
+  default = "taya-keypair"
+}
+
 
 
 variable "redis_name" {
