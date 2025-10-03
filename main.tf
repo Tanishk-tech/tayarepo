@@ -135,11 +135,11 @@ module "ec2_instance" {
 #   }
 # }
 
-# module "ec2-keypair" {
-#   source      = "github.com/Tanishk-tech/tayarepo//ec2-pair?ref=childModules"
-#   common_tags = var.common_tags
-#   public_key  = var.ec2_pub_keys
-# }
+module "ec2-keypair" {
+  source      = "github.com/Tanishk-tech/tayarepo//ec2-pair?ref=childModules"
+  common_tags = var.common_tags
+  public_key  = var.ec2_pub_keys
+}
 
 
 # module "ui_tg" {
