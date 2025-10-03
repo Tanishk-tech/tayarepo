@@ -184,14 +184,14 @@ variable "ui_name" {
 variable "ui_instance_name" {
   description = "Name of EC2 instance"
   type        = string
-  default = "ui-server"
+  default     = "ui-server"
 }
 
 
 variable "key_name" {
   description = "EC2 key pair name"
   type        = string
-  default = "taya-keypair"
+  default     = "taya-keypair"
 }
 
 
