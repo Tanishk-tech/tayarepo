@@ -33,4 +33,4 @@ terraform init
 
 # Run terraform plan
 echo "Running terraform plan..."
-terraform plan
+terraform apply
