@@ -33,4 +33,17 @@ terraform init
 
 # Run terraform plan
 echo "Running terraform plan..."
-terraform apply
+terraform plan 
+
+#!/bin/bash
+
+echo "Do you want to apply 'terraform apply'? (yes/no)"
+read input
+
+if [[ "$input" == "yes" || "$input" == "y" ]]; then
+    echo "Running terraform apply..."
+    terraform apply 
+else
+    echo "Okay, run terraform apply manually later."
+fi
+
