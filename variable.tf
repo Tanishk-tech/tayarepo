@@ -148,7 +148,7 @@ variable "ec2_job_ami" {
 }
 
 variable "ec2_ui_inst_type" {
-  default = "t3.micro"
+  default = "t2.medium"
 }
 
 variable "ec2_api_inst_type" {
