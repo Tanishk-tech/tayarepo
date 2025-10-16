@@ -21,10 +21,10 @@ locals {
     )
 }
 
-module "ae_kms" {
-  source      = "github.com/Tanishk-tech/tayarepo//kms?ref=childModules"
-  common_tags = var.common_tags
-}
+# module "ae_kms" {
+#   source      = "github.com/Tanishk-tech/tayarepo//kms?ref=childModules"
+#   common_tags = var.common_tags
+# }
 
 module "vpc" {
   source               = "github.com/Tanishk-tech/tayarepo//VPC?ref=childModules"
@@ -185,77 +185,77 @@ module "ui_tg" {
 #   deregistration_delay             = 60
 # }
 
-module "asg_ui" {
-  source           = "github.com/Tanishk-tech/tayarepo//ASG?ref=childModules"
-  asg_name         = "ui-asg"
-  desired_capacity = 1
-  min_size         = 1
-  max_size         = 4
-  ami              = var.ec2_ui_ami
-  vpc_id           = module.vpc.vpc_id
-  vpc_subnets      = module.subnets.private_subnet_ids
-  instance_type    = var.ec2_ui_inst_type
-  key_name         = module.ec2-keypair.ec2_key_name
-  user_data        = ""
-  kms_id           = module.ae_kms.kms_arn
-  common_tags      = var.common_tags
-  buckets_readonly = [module.s3-code-deploy.s3_id, module.s3-config.s3_id]
-  buckets_write    = [module.s3-logs.s3_id]
-  alerts_enabled   = true
+# module "asg_ui" {
+#   source           = "github.com/Tanishk-tech/tayarepo//ASG?ref=childModules"
+#   asg_name         = "ui-asg"
+#   desired_capacity = 1
+#   min_size         = 1
+#   max_size         = 4
+#   ami              = var.ec2_ui_ami
+#   vpc_id           = module.vpc.vpc_id
+#   vpc_subnets      = module.subnets.private_subnet_ids
+#   instance_type    = var.ec2_ui_inst_type
+#   key_name         = module.ec2-keypair.ec2_key_name
+#   user_data        = ""
+#   kms_id           = module.ae_kms.kms_arn
+#   common_tags      = var.common_tags
+#   buckets_readonly = [module.s3-code-deploy.s3_id, module.s3-config.s3_id]
+#   buckets_write    = [module.s3-logs.s3_id]
+#   alerts_enabled   = true
 
-  cpu_evaluation_periods = 1
-  cpu_threshold_max      = 80
-  cpu_threshold_min      = 40
-  cpu_period             = 300
-  cpu_statistic          = "Maximum"
-  auto_scale_on_cpu      = true
+#   cpu_evaluation_periods = 1
+#   cpu_threshold_max      = 80
+#   cpu_threshold_min      = 40
+#   cpu_period             = 300
+#   cpu_statistic          = "Maximum"
+#   auto_scale_on_cpu      = true
 
-  ram_evaluation_periods = 1
-  ram_threshold_max      = 80
-  ram_threshold_min      = 40
-  ram_period             = 300
-  ram_statistic          = "Maximum"
-  auto_scale_on_ram      = true
+#   ram_evaluation_periods = 1
+#   ram_threshold_max      = 80
+#   ram_threshold_min      = 40
+#   ram_period             = 300
+#   ram_statistic          = "Maximum"
+#   auto_scale_on_ram      = true
 
-  disk_evaluation_periods = 1
-  disk_threshold          = 80
-  disk_period             = 300
-  disk_statistic          = "Average"
-  root_volume_size        = 50
+#   disk_evaluation_periods = 1
+#   disk_threshold          = 80
+#   disk_period             = 300
+#   disk_statistic          = "Average"
+#   root_volume_size        = 50
 
-  #ssm_ssh                = true
-  isCouldWatchAgentPerm  = true
-  isCouldWatchLogs       = true
-  asg_termination_policy = ["OldestInstance"]
-  block_device_mappings = [
-    {
-      device_name = "/dev/sda1"
-      device_size = 80
-    }
-  ]
-  tg_arn = [module.ui_tg.target_group_arn]
+#   #ssm_ssh                = true
+#   isCouldWatchAgentPerm  = true
+#   isCouldWatchLogs       = true
+#   asg_termination_policy = ["OldestInstance"]
+#   block_device_mappings = [
+#     {
+#       device_name = "/dev/sda1"
+#       device_size = 80
+#     }
+#   ]
+#   tg_arn = [module.ui_tg.target_group_arn]
 
-  ingress_rules = [
-    {
-      description     = "LB UI Access"
-      from_port       = 80
-      to_port         = 80
-      protocol        = "tcp"
-      cidr_blocks     = ["172.16.0.0/16"]
-      security_groups = []
-    },
-    {
-      description     = "Bastion SSH Access"
-      from_port       = 22
-      to_port         = 22
-      protocol        = "tcp"
-      cidr_blocks     = ["172.16.0.0/16"]
-      security_groups = []
-    }
+#   ingress_rules = [
+#     {
+#       description     = "LB UI Access"
+#       from_port       = 80
+#       to_port         = 80
+#       protocol        = "tcp"
+#       cidr_blocks     = ["172.16.0.0/16"]
+#       security_groups = []
+#     },
+#     {
+#       description     = "Bastion SSH Access"
+#       from_port       = 22
+#       to_port         = 22
+#       protocol        = "tcp"
+#       cidr_blocks     = ["172.16.0.0/16"]
+#       security_groups = []
+#     }
 
-  ]
-  sg_outbond = ["0.0.0.0/0"]
-}
+#   ]
+#   sg_outbond = ["0.0.0.0/0"]
+# }
 
 
 # module "albv2" {
