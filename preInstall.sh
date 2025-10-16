@@ -19,6 +19,9 @@ fi
 git clone https://"$PAT_TOKEN"@github.com/Tanishk-tech/tayarepo -b ami
 cd /opt/packer/tayarepo
 
+echo "make terraform script executable..."
+chmod +x terraform_run.sh
+
 echo "=== Creating archives for nginx and javacode ==="
 tar czf nginx.tar.gz -C nginx .
 tar czf javacode.tar.gz -C javacode .
