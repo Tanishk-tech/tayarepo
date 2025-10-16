@@ -33,5 +33,11 @@ variable "common_tags" {
 
 variable "vpc_id" {
   description = "VPC ID"
-  type = string
+  type        = string
+}
+
+variable "ssm_ssh" {
+  type        = bool
+  default     = false
+  description = "for count of ec2"
 }
