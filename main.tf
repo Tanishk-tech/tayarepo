@@ -118,7 +118,7 @@ module "ec2_instance" {
   instance_name = var.ui_instance_name
   common_tags   = var.common_tags
   vpc_id        = module.vpc.vpc_id
-  ssm_ssh       = true
+  #ssm_ssh       = true
 
   depends_on = [module.ec2-keypair]
 }
@@ -166,24 +166,24 @@ module "ui_tg" {
 
 
 
-module "api_tg" {
-  source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
-  target_group_name                = "api-tg"
-  port                             = 9000
-  protocol                         = "HTTP"
-  vpc_id                           = module.vpc.vpc_id
-  health_check_healthy_threshold   = 3
-  health_check_unhealthy_threshold = 2
-  health_check_timeout             = 5
-  health_check_interval            = 30
-  health_check_path                = "/"
-  health_check_port                = "9000"
-  health_check_protocol            = "HTTP"
-  health_check_matcher             = "401"
-  common_tags                      = var.common_tags
-  stickiness                       = false
-  deregistration_delay             = 60
-}
+# module "api_tg" {
+#   source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
+#   target_group_name                = "api-tg"
+#   port                             = 9000
+#   protocol                         = "HTTP"
+#   vpc_id                           = module.vpc.vpc_id
+#   health_check_healthy_threshold   = 3
+#   health_check_unhealthy_threshold = 2
+#   health_check_timeout             = 5
+#   health_check_interval            = 30
+#   health_check_path                = "/"
+#   health_check_port                = "9000"
+#   health_check_protocol            = "HTTP"
+#   health_check_matcher             = "401"
+#   common_tags                      = var.common_tags
+#   stickiness                       = false
+#   deregistration_delay             = 60
+# }
 
 module "asg_ui" {
   source           = "github.com/Tanishk-tech/tayarepo//ASG?ref=childModules"
@@ -223,7 +223,7 @@ module "asg_ui" {
   disk_statistic          = "Average"
   root_volume_size        = 50
 
-  ssm_ssh                = true
+  #ssm_ssh                = true
   isCouldWatchAgentPerm  = true
   isCouldWatchLogs       = true
   asg_termination_policy = ["OldestInstance"]
