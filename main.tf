@@ -14,17 +14,17 @@ locals {
   #     error("❌ mqPassword is not set. Use TF_VAR_mqPassword to provide it.")
   #   )
 
-  #   validate_redisPassword = (
-  #     var.redisPassword != "" ?
-  #     var.redisPassword :
-  #     error("❌ redisPassword is not set. Use TF_VAR_redisPassword to provide it.")
-  #   )
+    validate_ec2_ui_ami = (
+      var.ec2_ui_ami != "" ?
+      var.ec2_ui_ami :
+      error("❌ ec2_ui_ami is not set. Use TF_VAR_ec2_ui_ami to provide it.")
+    )
 }
 
-# module "aeKms" {
-#   source      = "github.com/Tanishk-tech/tayarepo//kms?ref=childModules"
-#   common_tags = var.common_tags
-# }
+module "aeKms" {
+  source      = "github.com/Tanishk-tech/tayarepo//kms?ref=childModules"
+  common_tags = var.common_tags
+}
 
 module "vpc" {
   source               = "github.com/Tanishk-tech/tayarepo//VPC?ref=childModules"
@@ -146,116 +146,116 @@ module "ec2-keypair" {
 }
 
 
-# module "ui_tg" {
-#   source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
-#   target_group_name                = "ui-tg"
-#   port                             = 80
-#   protocol                         = "HTTP"
-#   vpc_id                           = module.vpc.vpc_id
-#   health_check_healthy_threshold   = 3
-#   health_check_unhealthy_threshold = 2
-#   health_check_timeout             = 5
-#   health_check_interval            = 30
-#   health_check_path                = "/"
-#   health_check_port                = "80"
-#   health_check_protocol            = "HTTP"
-#   health_check_matcher             = "200"
-#   common_tags                      = var.common_tags
-#   deregistration_delay             = 60
-# }
+module "ui_tg" {
+  source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
+  target_group_name                = "ui-tg"
+  port                             = 80
+  protocol                         = "HTTP"
+  vpc_id                           = module.vpc.vpc_id
+  health_check_healthy_threshold   = 3
+  health_check_unhealthy_threshold = 2
+  health_check_timeout             = 5
+  health_check_interval            = 30
+  health_check_path                = "/"
+  health_check_port                = "80"
+  health_check_protocol            = "HTTP"
+  health_check_matcher             = "200"
+  common_tags                      = var.common_tags
+  deregistration_delay             = 60
+}
 
 
 
-# module "api_tg" {
-#   source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
-#   target_group_name                = "api-tg"
-#   port                             = 9000
-#   protocol                         = "HTTP"
-#   vpc_id                           = module.vpc.vpc_id
-#   health_check_healthy_threshold   = 3
-#   health_check_unhealthy_threshold = 2
-#   health_check_timeout             = 5
-#   health_check_interval            = 30
-#   health_check_path                = "/"
-#   health_check_port                = "9000"
-#   health_check_protocol            = "HTTP"
-#   health_check_matcher             = "401"
-#   common_tags                      = var.common_tags
-#   stickiness                       = false
-#   deregistration_delay             = 60
-# }
+module "api_tg" {
+  source                           = "github.com/Tanishk-tech/tayarepo//ALB_TG?ref=childModules"
+  target_group_name                = "api-tg"
+  port                             = 9000
+  protocol                         = "HTTP"
+  vpc_id                           = module.vpc.vpc_id
+  health_check_healthy_threshold   = 3
+  health_check_unhealthy_threshold = 2
+  health_check_timeout             = 5
+  health_check_interval            = 30
+  health_check_path                = "/"
+  health_check_port                = "9000"
+  health_check_protocol            = "HTTP"
+  health_check_matcher             = "401"
+  common_tags                      = var.common_tags
+  stickiness                       = false
+  deregistration_delay             = 60
+}
 
-# module "asg_ui" {
-#   source           = "github.com/Tanishk-tech/tayarepo//ASG?ref=childModules"
-#   asg_name         = "ui-asg"
-#   desired_capacity = 1
-#   min_size         = 1
-#   max_size         = 4
-#   ami              = var.ec2_ui_ami
-#   vpc_id           = module.vpc.vpc_id
-#   vpc_subnets      = module.subnets.private_subnet_ids
-#   instance_type    = var.ec2_ui_inst_type
-#   key_name         = module.ec2-keypair.ec2_key_name
-#   user_data        = ""
-#   # kms_id           = module.ae_kms.kms_arn
-#   common_tags      = var.common_tags
-#   buckets_readonly = [module.s3-code-deploy.s3_id, module.s3-config.s3_id]
-#   # buckets_write    = [module.s3-logs.s3_id]
-#   alerts_enabled   = true
+module "asg_ui" {
+  source           = "github.com/Tanishk-tech/tayarepo//ASG?ref=childModules"
+  asg_name         = "ui-asg"
+  desired_capacity = 1
+  min_size         = 1
+  max_size         = 4
+  ami              = var.ec2_ui_ami
+  vpc_id           = module.vpc.vpc_id
+  vpc_subnets      = module.subnets.private_subnet_ids
+  instance_type    = var.ec2_ui_inst_type
+  key_name         = module.ec2-keypair.ec2_key_name
+  user_data        = ""
+  kms_id           = module.ae_kms.kms_arn
+  common_tags      = var.common_tags
+  buckets_readonly = [module.s3-code-deploy.s3_id, module.s3-config.s3_id]
+  buckets_write    = [module.s3-logs.s3_id]
+  alerts_enabled   = true
 
-#   cpu_evaluation_periods = 1
-#   cpu_threshold_max      = 80
-#   cpu_threshold_min      = 40
-#   cpu_period             = 300
-#   cpu_statistic          = "Maximum"
-#   auto_scale_on_cpu      = true
+  cpu_evaluation_periods = 1
+  cpu_threshold_max      = 80
+  cpu_threshold_min      = 40
+  cpu_period             = 300
+  cpu_statistic          = "Maximum"
+  auto_scale_on_cpu      = true
 
-#   ram_evaluation_periods = 1
-#   ram_threshold_max      = 80
-#   ram_threshold_min      = 40
-#   ram_period             = 300
-#   ram_statistic          = "Maximum"
-#   auto_scale_on_ram      = true
+  ram_evaluation_periods = 1
+  ram_threshold_max      = 80
+  ram_threshold_min      = 40
+  ram_period             = 300
+  ram_statistic          = "Maximum"
+  auto_scale_on_ram      = true
 
-#   disk_evaluation_periods = 1
-#   disk_threshold          = 80
-#   disk_period             = 300
-#   disk_statistic          = "Average"
-#   root_volume_size        = 50
+  disk_evaluation_periods = 1
+  disk_threshold          = 80
+  disk_period             = 300
+  disk_statistic          = "Average"
+  root_volume_size        = 50
 
-#   ssm_ssh                = true
-#   isCouldWatchAgentPerm  = true
-#   isCouldWatchLogs       = true
-#   asg_termination_policy = ["OldestInstance"]
-#   # block_device_mappings = [
-#   #   {
-#   #     device_name = "/dev/sda1"
-#   #     device_size = 80
-#   #   }
-#   # ]
-#   tg_arn = [module.ui_tg.target_group_arn]
+  ssm_ssh                = true
+  isCouldWatchAgentPerm  = true
+  isCouldWatchLogs       = true
+  asg_termination_policy = ["OldestInstance"]
+  block_device_mappings = [
+    {
+      device_name = "/dev/sda1"
+      device_size = 80
+    }
+  ]
+  tg_arn = [module.ui_tg.target_group_arn]
 
-#   ingress_rules = [
-#     {
-#       description     = "LB UI Access"
-#       from_port       = 80
-#       to_port         = 80
-#       protocol        = "tcp"
-#       cidr_blocks     = ["172.16.0.0/16"]
-#       security_groups = []
-#     },
-#     {
-#       description     = "Bastion SSH Access"
-#       from_port       = 22
-#       to_port         = 22
-#       protocol        = "tcp"
-#       cidr_blocks     = ["172.16.0.0/16"]
-#       security_groups = []
-#     }
+  ingress_rules = [
+    {
+      description     = "LB UI Access"
+      from_port       = 80
+      to_port         = 80
+      protocol        = "tcp"
+      cidr_blocks     = ["172.16.0.0/16"]
+      security_groups = []
+    },
+    {
+      description     = "Bastion SSH Access"
+      from_port       = 22
+      to_port         = 22
+      protocol        = "tcp"
+      cidr_blocks     = ["172.16.0.0/16"]
+      security_groups = []
+    }
 
-#   ]
-#   sg_outbond = ["0.0.0.0/0"]
-# }
+  ]
+  sg_outbond = ["0.0.0.0/0"]
+}
 
 
 # module "albv2" {
