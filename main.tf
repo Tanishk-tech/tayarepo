@@ -21,7 +21,7 @@ locals {
     )
 }
 
-module "aeKms" {
+module "ae_kms" {
   source      = "github.com/Tanishk-tech/tayarepo//kms?ref=childModules"
   common_tags = var.common_tags
 }
