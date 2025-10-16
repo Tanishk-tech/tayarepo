@@ -118,6 +118,7 @@ module "ec2_instance" {
   instance_name = var.ui_instance_name
   common_tags   = var.common_tags
   vpc_id        = module.vpc.vpc_id
+  ssm_ssh       = true
 
   depends_on = [module.ec2-keypair]
 }
