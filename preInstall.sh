@@ -1,38 +1,98 @@
-#!/bin/bash
+packer {
+  required_plugins {
+    amazon = {
+      source  = "github.com/hashicorp/amazon"
+      version = ">= 1.0.0"
+    }
+  }
+}
 
-echo "=== Installing Packer ==="
-cd /tmp
-wget -q https://releases.hashicorp.com/packer/1.11.2/packer_1.11.2_linux_amd64.zip
-unzip -o packer_1.11.2_linux_amd64.zip
-sudo mv -f packer /usr/local/bin/
-packer --version
+variable "region" {
+  default = "us-east-1"
+}
 
-echo "=== Preparing Packer workspace ==="
-mkdir -p /opt/packer
-cd /opt/packer
+source "amazon-ebs" "ui_ami" {
+  region                  = var.region
+  instance_type           = "t2.micro"
+  ami_name                = "ui-ami-{{timestamp}}"
 
-if [ -z "${PAT_TOKEN:-}" ]; then
-  echo "Error: PAT_TOKEN is not set."
-  exit 1
-fi
+  source_ami_filter {
+    filters = {
+      name                = "al2023-ami-2023.*-x86_64"
+      root-device-type    = "ebs"
+      virtualization-type = "hvm"
+    }
+    owners      = ["amazon"]
+    most_recent = true
+  }
 
-git clone https://"$PAT_TOKEN"@github.com/Tanishk-tech/tayarepo -b ami
-cd /opt/packer/tayarepo
+  ssh_username = "ec2-user"
+}
 
-echo "make terraform script executable..."
-chmod +x terraform_run.sh
+build {
+  name    = "ui-ami-build"
+  sources = ["source.amazon-ebs.ui_ami"]
 
-echo "=== Creating archives for nginx and javacode ==="
-tar czf nginx.tar.gz -C nginx .
-tar czf javacode.tar.gz -C javacode .
+  # Upload app and NGINX configs
+  provisioner "file" {
+    source      = "/opt/packer/tayarepo/nginx.tar.gz"
+    destination = "/tmp/nginx.tar.gz"
+  }
 
-echo "=== Initializing and building Packer template ==="
-packer init .
-packer build ui_ami.pkr.hcl
+  provisioner "file" {
+    source      = "/opt/packer/tayarepo/javacode.tar.gz"
+    destination = "/tmp/javacode.tar.gz"
+  }
 
-echo "=== Creating S3 bucket ==="
-aws s3api create-bucket \
-    --bucket dev-taya-aehsc-tf-state \
-    --region us-east-1
+  provisioner "shell" {
+    inline = [
+      # --- OS Update & Packages ---
+      "sudo dnf -y update",
+      "sudo dnf install -y nginx java-17-amazon-corretto java-17-amazon-corretto-devel cronie tar",
 
-echo "=== Script Completed Successfully ==="
+      # --- Enable NGINX ---
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable nginx",
+      "sudo systemctl start nginx",
+
+      # --- Enable crond ---
+      "sudo systemctl enable crond",
+      "sudo systemctl start crond",
+
+      # --- Extract uploaded archives ---
+      "sudo mkdir -p /opt/javacode /opt/nginx",
+      "sudo tar xzf /tmp/nginx.tar.gz -C /etc/nginx/",
+      "sudo tar xzf /tmp/javacode.tar.gz -C /opt/javacode/",
+
+      # --- Sample NGINX page ---
+      "echo '<h1>UI AMI Ready (Amazon Linux 2023)</h1>' | sudo tee /usr/share/nginx/html/index.html",
+
+      # --- Compile Java file ---
+      "cd /opt/javacode",
+      "sudo javac ex.java",
+
+      # --- Create systemd service for Java Health Check ---
+      "sudo bash -c 'cat > /etc/systemd/system/healthcheck.service <<EOF",
+      "[Unit]",
+      "Description=Simple Java Health Check Service",
+      "After=network.target",
+      "",
+      "[Service]",
+      "ExecStart=/usr/bin/java -cp /opt/javacode ex",
+      "WorkingDirectory=/opt/javacode",
+      "Restart=always",
+      "User=ec2-user",
+      "StandardOutput=append:/var/log/healthcheck.log",
+      "StandardError=append:/var/log/healthcheck.log",
+      "",
+      "[Install]",
+      "WantedBy=multi-user.target",
+      "EOF'",
+
+      # --- Enable and start the service ---
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable healthcheck",
+      "sudo systemctl start healthcheck"
+    ]
+  }
+}
