@@ -33,7 +33,7 @@ build {
   name    = "ui-ami-build"
   sources = ["source.amazon-ebs.ui_ami"]
 
-  # Upload NGINX and Java app code
+  # Upload app and NGINX configs
   provisioner "file" {
     source      = "/opt/packer/tayarepo/nginx.tar.gz"
     destination = "/tmp/nginx.tar.gz"
@@ -46,50 +46,50 @@ build {
 
   provisioner "shell" {
     inline = [
-      # Update OS
+      # --- OS Update & Packages ---
       "sudo dnf -y update",
-
-      # Install required packages
       "sudo dnf install -y nginx java-17-amazon-corretto java-17-amazon-corretto-devel cronie tar",
 
-      # Enable + start nginx
+      # --- Enable NGINX ---
       "sudo systemctl daemon-reload",
       "sudo systemctl enable nginx",
       "sudo systemctl start nginx",
 
-      # Enable and start cron service
+      # --- Enable crond ---
       "sudo systemctl enable crond",
       "sudo systemctl start crond",
 
-      # Extract uploaded files
+      # --- Extract uploaded archives ---
       "sudo mkdir -p /opt/javacode /opt/nginx",
       "sudo tar xzf /tmp/nginx.tar.gz -C /etc/nginx/",
       "sudo tar xzf /tmp/javacode.tar.gz -C /opt/javacode/",
 
-      # Create sample landing page
+      # --- Sample NGINX page ---
       "echo '<h1>UI AMI Ready (Amazon Linux 2023)</h1>' | sudo tee /usr/share/nginx/html/index.html",
 
-      # --- Compile Java Health Check ---
+      # --- Compile Java file ---
       "cd /opt/javacode",
-      "sudo javac SimpleHealthCheck.java",
+      "sudo javac ex.java",
 
-      # --- Create Systemd Service for Java Health Check ---
+      # --- Create systemd service for Java Health Check ---
       "sudo bash -c 'cat > /etc/systemd/system/healthcheck.service <<EOF",
       "[Unit]",
       "Description=Simple Java Health Check Service",
       "After=network.target",
       "",
       "[Service]",
-      "ExecStart=/usr/bin/java -cp /opt/javacode SimpleHealthCheck",
+      "ExecStart=/usr/bin/java -cp /opt/javacode ex",
       "WorkingDirectory=/opt/javacode",
       "Restart=always",
       "User=ec2-user",
+      "StandardOutput=append:/var/log/healthcheck.log",
+      "StandardError=append:/var/log/healthcheck.log",
       "",
       "[Install]",
       "WantedBy=multi-user.target",
       "EOF'",
 
-      # Enable and start the Java health check service
+      # --- Enable and start the service ---
       "sudo systemctl daemon-reload",
       "sudo systemctl enable healthcheck",
       "sudo systemctl start healthcheck"
