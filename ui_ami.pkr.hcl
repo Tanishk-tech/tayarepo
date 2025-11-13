@@ -33,7 +33,6 @@ build {
   name    = "ui-ami-build"
   sources = ["source.amazon-ebs.ui_ami"]
 
-  # Upload app and NGINX configs
   provisioner "file" {
     source      = "/opt/packer/tayarepo/nginx.tar.gz"
     destination = "/tmp/nginx.tar.gz"
@@ -46,53 +45,31 @@ build {
 
   provisioner "shell" {
     inline = [
-      # --- OS Update & Packages ---
+      # Update OS
       "sudo dnf -y update",
+
+      # Install required packages
       "sudo dnf install -y nginx java-17-amazon-corretto java-17-amazon-corretto-devel cronie tar",
 
-      # --- Enable NGINX ---
+      # Enable + start nginx
       "sudo systemctl daemon-reload",
       "sudo systemctl enable nginx",
       "sudo systemctl start nginx",
 
-      # --- Enable crond ---
+      # Enable and start cron service (needed for @reboot jobs)
       "sudo systemctl enable crond",
       "sudo systemctl start crond",
 
-      # --- Extract uploaded archives ---
+      # Extract uploaded files
       "sudo mkdir -p /opt/javacode /opt/nginx",
       "sudo tar xzf /tmp/nginx.tar.gz -C /etc/nginx/",
       "sudo tar xzf /tmp/javacode.tar.gz -C /opt/javacode/",
 
-      # --- Sample NGINX page ---
+      # Create sample landing page
       "echo '<h1>UI AMI Ready (Amazon Linux 2023)</h1>' | sudo tee /usr/share/nginx/html/index.html",
 
-      # --- Compile Java file ---
-      "cd /opt/javacode",
-      "sudo javac ex.java",
-
-      # --- Create systemd service for Java Health Check ---
-      "sudo bash -c 'cat > /etc/systemd/system/healthcheck.service <<EOF",
-      "[Unit]",
-      "Description=Simple Java Health Check Service",
-      "After=network.target",
-      "",
-      "[Service]",
-      "ExecStart=/usr/bin/java -cp /opt/javacode ex",
-      "WorkingDirectory=/opt/javacode",
-      "Restart=always",
-      "User=ec2-user",
-      "StandardOutput=append:/var/log/healthcheck.log",
-      "StandardError=append:/var/log/healthcheck.log",
-      "",
-      "[Install]",
-      "WantedBy=multi-user.target",
-      "EOF'",
-
-      # --- Enable and start the service ---
-      "sudo systemctl daemon-reload",
-      "sudo systemctl enable healthcheck",
-      "sudo systemctl start healthcheck"
+      # Setup Java app to run at reboot
+      "(crontab -l 2>/dev/null; echo '@reboot nohup java -cp /opt/javacode MainClass &') | crontab -"
     ]
   }
 }
