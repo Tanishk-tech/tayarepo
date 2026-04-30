@@ -2,7 +2,7 @@
 
 terraform {
   backend "s3" {
-    bucket  = "dev-taya-aehsc-tf-state"
+    bucket  = "dev-taya-aehsc-tf-state-1"
     key     = "dev-taya-tf/state.tfstate"
     region  = "us-east-1"
     encrypt = true
