@@ -47,59 +47,9 @@ module "subnets" {
   use_individual_nat_gateways = var.use_individual_nat_gateways
 }
 
-module "s3-code-deploy" {
-  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
-  s3_name           = "code-deploy"
-  s3_acl            = var.s3_acl
-  s3_versioning     = "Disabled"
-  s3_index_document = var.s3_index_document
-  s3_error_document = var.s3_error_document
-  s3_enable_website = false
-  s3_routing_rules  = var.s3_routing_rules
-  common_tags       = var.common_tags
-}
-
-
-module "s3-config" {
-  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
-  s3_name           = "apps-config"
-  s3_acl            = var.s3_acl
-  s3_versioning     = "Disabled"
-  s3_index_document = var.s3_index_document
-  s3_error_document = var.s3_error_document
-  s3_enable_website = false
-  s3_routing_rules  = var.s3_routing_rules
-  common_tags       = var.common_tags
-  folders           = ["configs", "configs"]
-}
-
-module "s3-logs" {
-  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
-  s3_name           = "apps-logs"
-  s3_acl            = var.s3_acl
-  s3_versioning     = "Disabled"
-  s3_index_document = var.s3_index_document
-  s3_error_document = var.s3_error_document
-  s3_enable_website = false
-  s3_routing_rules  = var.s3_routing_rules
-  common_tags       = var.common_tags
-}
-
-module "mtls-truststore" {
-  source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
-  s3_name           = "mtls-truststore"
-  s3_acl            = var.s3_acl
-  s3_versioning     = var.s3_versioning
-  s3_index_document = var.s3_index_document
-  s3_error_document = var.s3_error_document
-  s3_enable_website = false
-  s3_routing_rules  = var.s3_routing_rules
-  common_tags       = var.common_tags
-}
-
 module "s3_heapdump" {
   source            = "github.com/Tanishk-tech/tayarepo//S3?ref=childModules"
-  s3_name           = "heapdump"
+  s3_name           = "heapdump1"
   s3_acl            = var.s3_acl
   s3_versioning     = "Suspended"
   s3_index_document = var.s3_index_document
